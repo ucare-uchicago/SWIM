@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TESTDIR=scriptsTest-16MB
+TESTDIR=scriptsTest-16MB-scaled
 
 #WORKLOAD='FB-2009_samples_24_times_1hr_0_first50jobs.tsv'
 WORKLOAD=FB-2009_samples_24_times_1hr_0.tsv
@@ -9,9 +9,12 @@ WORKLOAD=FB-2009_samples_24_times_1hr_0.tsv
 BLOCKSIZE=16777216 # 16MB
 #BLOCKSIZE=67108864 # 64MB
 
+SCALE=$(bc -l <<< "${BLOCKSIZE}/67108864")
+
 echo $TESTDIR
 echo $WORKLOAD
 echo $BLOCKSIZE
+echo $SCALE
 
 java GenerateReplayScript \
        $WORKLOAD \
@@ -26,4 +29,5 @@ java GenerateReplayScript \
        workGenLogs  \
        $HADOOP_HOME/bin/hadoop \
        /proj/ucare/riza/SWIM/workloadSuite/WorkGen.jar \
-       $HADOOP_CONF_DIR/workGenKeyValue_conf.xsl
+       $HADOOP_CONF_DIR/workGenKeyValue_conf.xsl \
+       $SCALE

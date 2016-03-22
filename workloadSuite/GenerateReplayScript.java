@@ -81,7 +81,8 @@ public class GenerateReplayScript {
 				   String workloadOutputDir,
 				   String hadoopCommand,
 				   String pathToWorkGenJar,
-				   String pathToWorkGenConf) throws Exception {
+				   String pathToWorkGenConf,
+                                   double scalingFactor) throws Exception {
 	
 
 	if (workloadData.size() > 0) {
@@ -116,14 +117,20 @@ public class GenerateReplayScript {
 		// Currently not done 
 		//
 		// sleep   = sleep   * clusterSizeRaw / clusterSizeWorkload; 
-		
+
+		// riza: scale sleep by scaling factor
+                sleep = (int) Math.ceil(sleep * scalingFactor);
+
 		input   = input   * clusterSizeWorkload / clusterSizeRaw;
 		shuffle = shuffle * clusterSizeWorkload / clusterSizeRaw;
 		output  = output  * clusterSizeWorkload / clusterSizeRaw; 
 
 		if (input > maxInput) maxInput = input;
-		if (input < maxSeqFile(67108864)) input = maxSeqFile(67108864); // 64 MB minimum size
+                // riza: scaling input
+		int scaledLimit = (int) Math.round(67108864 * scalingFactor);
+		if (input < maxSeqFile(scaledLimit)) input = maxSeqFile(scaledLimit); // 64 MB used to be minimum size
 
+                // riza: this might need to be scaled too
 		if (shuffle < 1024    ) shuffle = 1024    ;
 		if (output  < 1024    ) output  = 1024    ;
 
@@ -192,7 +199,8 @@ public class GenerateReplayScript {
 
                 FileWriter runFile = new FileWriter(scriptDirPath + "/run-job-" + i + ".sh");
                 runFile.write(toWrite.toCharArray(), 0, toWrite.length());
-                toWrite = "" + hadoopCommand + " dfs -rmr " + outputPath + "\n";
+                // riza: deletion here
+                toWrite = "" + hadoopCommand + " dfs -rm -r " + outputPath + "\n";
                 runFile.write(toWrite.toCharArray(), 0, toWrite.length());
                 toWrite = "# inputSize " + input + "\n";
                 runFile.write(toWrite.toCharArray(), 0, toWrite.length());
@@ -350,7 +358,7 @@ public class GenerateReplayScript {
      */
     public static void main(String args[]) throws Exception {
 	
-	if (args.length < 10) {
+	if (args.length < 11) {
 
 	    System.out.println();
 	    System.out.println("Insufficient arguments.");
@@ -370,6 +378,7 @@ public class GenerateReplayScript {
 	    System.out.println("  [hadoop command on your system]");
 	    System.out.println("  [path to WorkGen.jar]");
 	    System.out.println("  [path to workGenKeyValue_conf.xsl]");
+	    System.out.println("  [pbse: scaling factor to adjust sleep and inputSize. Value: 0.0-1.0]");
 	    System.out.println();
 
 	} else {
@@ -394,6 +403,8 @@ public class GenerateReplayScript {
 	    String hadoopCommand = args[10];
 	    String pathToWorkGenJar = args[11];
 	    String pathToWorkGenConf = args[12];
+	    double scalingFactor = Double.parseDouble(args[13]);
+
 
 	    // parse data
 
@@ -451,7 +462,7 @@ public class GenerateReplayScript {
 
 	    printOutput(workloadData, clusterSizeRaw, clusterSizeWorkload, 
 			inputPartitionSize, inputPartitionCount, scriptDirPath, hdfsInputDir, hdfsOutputPrefix,
-			totalDataPerReduce, workloadOutputDir, hadoopCommand, pathToWorkGenJar, pathToWorkGenConf);
+			totalDataPerReduce, workloadOutputDir, hadoopCommand, pathToWorkGenJar, pathToWorkGenConf, scalingFactor);
 
 
 		System.out.println("Parameter values for randomwriter_conf.xsl:");

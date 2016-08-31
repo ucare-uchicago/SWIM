@@ -106,8 +106,8 @@ public class GenerateReplayScript {
 
 	    int written = 0;
 	    
-	    for (int i=0; i<workloadData.size(); i++) {
-
+	    // for (int i=0; (i<workloadData.size()) && (i<150); i++) {
+	    for (int i=1120; (i<workloadData.size()) && (i<1270); i++) {
 		long sleep   = Long.parseLong(workloadData.get(i).get(INTER_JOB_SLEEP_TIME));
 		long input   = Long.parseLong(workloadData.get(i).get(INPUT_DATA_SIZE));
 		long shuffle = Long.parseLong(workloadData.get(i).get(SHUFFLE_DATA_SIZE));

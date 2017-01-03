@@ -19,10 +19,10 @@
    </property>
    <property>
      <name>test.randomwrite.total_bytes</name>
-     <value>671088640</value>
+     <value>570000000</value>
    </property>
    <property>
      <name>test.randomwrite.bytes_per_map</name>
-     <value>67108864</value>
+     <value>570000000</value>
    </property>
 </configuration>

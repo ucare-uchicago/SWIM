@@ -188,7 +188,7 @@ public class WorkGen extends Configured implements Tool {
   public int run(String[] args) throws Exception {
 
     JobConf jobConf = new JobConf(getConf(), WorkGen.class);
-    jobConf.setJobName("workGen");
+    //jobConf.setJobName("workGen");
 
     jobConf.setMapperClass(RatioMapper.class);        
     jobConf.setReducerClass(RatioReducer.class);
@@ -213,6 +213,7 @@ public class WorkGen extends Configured implements Tool {
       try {
         if ("-m".equals(args[i])) {
 	    num_maps = Integer.parseInt(args[++i]);
+	    jobConf.setNumMapTasks(num_maps);
         } else if ("-r".equals(args[i])) {
 	    num_reduces = Integer.parseInt(args[++i]);
         } else if ("-inFormat".equals(args[i])) {
@@ -261,6 +262,12 @@ public class WorkGen extends Configured implements Tool {
     FileOutputFormat.setOutputPath(jobConf, new Path(otherArgs.get(1)));
     jobConf.set("workGen.ratios.shuffleInputRatio", otherArgs.get(2));
     jobConf.set("workGen.ratios.outputShuffleRatio", otherArgs.get(3));
+
+    // ellisjoe: set job name to configured name plus outputPath which includes
+    //           the job number
+    String outputPath = otherArgs.get(1);
+    String jobName = jobConf.getJobName() + "-" + outputPath;
+    jobConf.setJobName(jobName);
 
     System.out.println("Max number of map tasks " + cluster.getMaxMapTasks());
     System.out.println("Max number of red tasks " + cluster.getMaxReduceTasks());
